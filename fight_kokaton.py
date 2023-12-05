@@ -6,8 +6,8 @@ import time
 import pygame as pg
 
 
-WIDTH = 1600  # ゲームウィンドウの幅
-HEIGHT = 900  # ゲームウィンドウの高さ
+WIDTH = 1000  # ゲームウィンドウの幅
+HEIGHT = 700  # ゲームウィンドウの高さ
 MAIN_DIR = os.path.split(os.path.abspath(__file__))[0]
 
 
@@ -92,6 +92,8 @@ class Bird:
 
 
 class Bomb:
+
+
     """
     爆弾に関するクラス
     """
@@ -120,6 +122,36 @@ class Bomb:
             self.vy *= -1
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+
+
+
+
+
+class Beam:
+    """
+    こうかとんが放つビームに関するクラス
+    """
+    def __init__(self, bird: Bird):
+        """
+        引数に基づきビームSurfaceを生成する
+        引数 bird：ビームを放つこうかとん
+        """
+        self.img = pg.transform.rotozoom(pg.image.load(f"ex03/fig/beam.png"), 0, 2.0)
+        self.rct = self.img.get_rect()
+        self.rct.left = bird.rct.right
+        self.rct.centery = bird.rct.centery
+        self.vx, self.vy = +5, 0
+    
+    def update(self, screen: pg.Surface):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        self.rct.move_ip(self.vx, self.vy)
+        screen.blit(self.img, self.rct)
+
+
+
 
 
 def main():
