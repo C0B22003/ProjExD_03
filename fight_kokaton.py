@@ -66,6 +66,7 @@ class Bird:
         self.img = self.imgs[(+5, 0)]  # 右向きこうかとんをデフォ画像にする
         self.rct = self.img.get_rect()
         self.rct.center = xy
+        self.beams = []
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -93,6 +94,19 @@ class Bird:
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):  # なにもキーが押されていなくなかったら
             self.img = self.imgs[tuple(sum_mv)] 
         screen.blit(self.img, self.rct)
+
+    def fire_beam(self):
+        new_beam = Beam(self.rct)
+        self.beams.append(new_beam)
+
+    def update_beams(self, screen: pg.Surface):
+        beams_to_remove = []
+        for beam in self.beams:
+            beam.update(screen)
+            if not check_bound(beam.rct):
+                beams_to_remove.append(beam)
+        for beam in beams_to_remove:
+            self.beams.remove(beam)
 
 
 class Bomb:
@@ -145,6 +159,18 @@ class Beam:
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
 
+class Score:
+    # スコアを表示する
+    def __init__(self):
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.score = 0 # 初期値
+        self.img = self.font.render(f"スコア：{self.score}", 0, (0,0,255))
+        self.cx = 100 # 中心座標
+        self.cy = HEIGHT-50
+    
+    def update(self, score: pg.Surface):
+        self.img = self.font.render(f"スコア：{self.score}",0,(0,0,255))#後で見返す
+        score.blit(self.img,(self.cx,self.cy))
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -154,9 +180,10 @@ def main():
     # BombインスタンスがNUM個並んだリスト
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]  
     beam = None
-    #オリジナル機能
+    # オリジナル機能
     fonto =  pg.font.Font(None, 80)
     moji = fonto.render("game over", True, (255,255,255))
+    scores = Score()
 
     clock = pg.time.Clock()
     tmr = 0
@@ -168,6 +195,8 @@ def main():
                 beam = Beam(bird)  # ビームインスタンスの生成
         
         screen.blit(bg_img, [0, 0])
+
+        
         
         for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):
